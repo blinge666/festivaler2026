@@ -1,29 +1,20 @@
-# Festivalplan PWA
+# Festivalplan v2
 
-Dette er en enkel PWA for Øya + Tons of Rock med favoritter og personlig plan.
+Oppdatert PWA med:
+- Øya + Tons of Rock i én løsning
+- Favoritter
+- Min plan
+- Bør se-fane
+- Twisted Sister fjernet fra Tons-delen
 
-## Filer
-- `index.html`
-- `manifest.json`
-- `service-worker.js`
-- `icon.svg`
+## Publisering på GitHub Pages
+Last opp disse filene til roten av repoet:
+- index.html
+- manifest.json
+- service-worker.js
+- icon.svg
 
-## GitHub Pages – superkort oppskrift
-1. Lag en ny public repo på GitHub, f.eks. `festivalplan`
-2. Last opp alle filene i denne mappen til roten av repoet
-3. Gå til **Settings → Pages**
-4. Under **Build and deployment**, velg:
-   - **Source:** Deploy from a branch
-   - **Branch:** main
-   - **Folder:** / (root)
-5. Lagre
-
-Deretter får du en lenke som:
-`https://DITTBRUKERNAVN.github.io/festivalplan/`
-
-## Oppdatere senere
-Erstatt bare `index.html` med en ny versjon og push/last opp på nytt.
-
-## Installere som app
-På iPhone: åpne siden i Safari → Del → Legg til på Hjem-skjerm
-På Android: åpne siden i Chrome → meny → Installer app / Legg til på startsiden
+Velg deretter:
+- Deploy from a branch
+- main
+- / (root)
