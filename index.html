@@ -1,361 +1,48 @@
 <!DOCTYPE html>
-<html lang="no">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f1115">
-  <meta name="description" content="Mobilvennlig PWA for Øya og Tons of Rock med favoritter og personlig tidsplan.">
-  <link rel="manifest" href="manifest.json">
-  <title>Festivalplan v2</title>
-  <style>
-    :root {
-      --bg:#0f1115;
-      --panel:#171a21;
-      --panel2:#1f2430;
-      --card:#131823;
-      --text:#f4f7fb;
-      --muted:#cbd5e1;
-      --border:#2c3442;
-      --accent:#86efac;
-      --btn:#2a3140;
-      --btn2:#3a4456;
-      --danger:#fca5a5;
-      --star:#facc15;
-    }
-    * { box-sizing:border-box; }
-    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: Inter, Arial, sans-serif; }
-    body { -webkit-text-size-adjust:100%; }
-    .app { max-width:900px; margin:0 auto; padding:16px; }
-    h1 { margin:0 0 8px; font-size:1.55rem; line-height:1.15; }
-    p { margin:0; }
-    .lead { color:#e2e8f0; line-height:1.45; margin-bottom:10px; font-size:.97rem; }
-    .note { color:var(--muted); line-height:1.45; margin-bottom:14px; font-size:.9rem; }
-    .bar { position:sticky; top:0; z-index:30; background:rgba(15,17,21,.96); backdrop-filter: blur(8px); padding:10px 0 12px; }
-    .tabs { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:12px 0 10px; }
-    .tab { background:var(--btn); color:var(--text); border:none; border-radius:10px; min-height:42px; font-size:.88rem; padding:10px 8px; }
-    .tab.active { background:var(--btn2); }
-    .toolbar { display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:12px; }
-    input[type="search"], select {
-      width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--border);
-      border-radius:10px; min-height:42px; padding:10px 12px; font-size:.95rem;
-    }
-    .chips { display:flex; gap:8px; flex-wrap:wrap; }
-    .chip {
-      background:var(--panel2); color:var(--muted); border:1px solid var(--border); border-radius:999px;
-      padding:8px 10px; font-size:.85rem; cursor:pointer;
-    }
-    .chip.active { color:var(--text); border-color:#4b5563; }
-    .section { margin-bottom:12px; }
-    details {
-      background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:12px;
-    }
-    summary {
-      list-style:none; cursor:pointer; padding:14px 16px; background:var(--panel2); font-weight:700; display:flex;
-      justify-content:space-between; gap:12px; align-items:center; font-size:.98rem;
-    }
-    summary::-webkit-details-marker { display:none; }
-    .count { color:var(--muted); font-weight:600; font-size:.9rem; white-space:nowrap; }
-    .cards { padding:10px; }
-    .card {
-      background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px;
-    }
-    .card:last-child { margin-bottom:0; }
-    .row { display:flex; flex-direction:column; gap:10px; }
-    .titleRow { display:flex; gap:10px; justify-content:space-between; align-items:flex-start; }
-    .titleWrap { min-width:0; flex:1; }
-    .title { font-weight:700; color:white; font-size:1rem; line-height:1.25; }
-    .sub { color:var(--muted); font-size:.9rem; margin-top:4px; line-height:1.35; }
-    .meta { color:var(--accent); font-size:.9rem; font-weight:600; margin-top:6px; line-height:1.35; }
-    .similar { color:var(--muted); font-size:.92rem; line-height:1.45; margin-top:8px; }
-    .why { color:var(--muted); font-size:.92rem; line-height:1.45; margin-top:8px; }
-    .actions { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    .btn {
-      background:var(--btn); color:var(--text); border:none; border-radius:10px; min-height:42px;
-      padding:10px 8px; text-decoration:none; display:flex; align-items:center; justify-content:center;
-      text-align:center; font-size:.92rem;
-    }
-    .btn:hover { background:var(--btn2); }
-    .fav.active { color:var(--star); }
-    .empty {
-      background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px; color:var(--muted);
-      line-height:1.5;
-    }
-    .pill {
-      display:inline-block; margin-top:6px; background:#243041; color:#dbeafe; border-radius:999px; padding:5px 8px; font-size:.78rem;
-    }
-    .footer { color:var(--muted); font-size:.85rem; line-height:1.5; margin-top:16px; }
-    @media (min-width:721px) {
-      .app { padding:24px; }
-      h1 { font-size:1.9rem; }
-      .toolbar { grid-template-columns:1.2fr .8fr; }
-      .row { gap:12px; }
-      .actions { width:auto; grid-template-columns:auto auto auto; }
-      .titleRow { align-items:center; }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div class="bar">
-      <h1>Festivalplan v2</h1>
-      <p class="lead">Én mobilvennlig PWA for Øya og Tons of Rock, med favoritter og personlig tidsplan.</p>
-      <p class="note">Ryddet v2 uten interne referanser i toppteksten. Tons of Rock-delen er oppdatert uten Twisted Sister.</p>
-      <div class="tabs">
-        <button class="tab active" data-view="festivaler">Festivaler</button>
-        <button class="tab" data-view="borses">Bør se</button>
-        <button class="tab" data-view="favoritter">Favoritter</button>
-        <button class="tab" data-view="plan">Min plan</button>
-        <button class="tab" data-view="om">Om</button>
-      </div>
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="Søk artist, sjanger eller lignende …">
-        <select id="festivalFilter">
-          <option value="Alle">Alle festivaler</option>
-          <option value="Øya">Øya</option>
-          <option value="Tons of Rock">Tons of Rock</option>
-        </select>
-      </div>
-      <div class="chips" id="dayChips"></div>
-    </div>
-
-    <main id="content"></main>
-
-    <div class="footer">
-      Installerbar PWA: når du legger denne på GitHub Pages eller Netlify, kan den legges til på hjemskjermen på mobil.
-    </div>
-  </div>
-
-  <script>
-    const DATA = [{"festival": "Øya", "artist": "The Cure", "category": "Rock", "genre": "alternativ/post-punk", "day": "Onsdag 12. august", "stage": "Amfiet", "similar": ["Joy Division", "Siouxsie and the Banshees", "New Order"], "spotify": "https://open.spotify.com/search/The%20Cure", "link": "https://www.oyafestivalen.no/artister/the-cure"}, {"festival": "Øya", "artist": "Nick Cave & The Bad Seeds", "category": "Rock", "genre": "alternativ rock", "day": "Torsdag 13. august", "stage": "Amfiet", "similar": ["Tom Waits", "Leonard Cohen", "PJ Harvey"], "spotify": "https://open.spotify.com/search/Nick%20Cave%20%26%20The%20Bad%20Seeds", "link": "https://www.oyafestivalen.no/artister/nick-cave-and-the-bad-seeds"}, {"festival": "Øya", "artist": "Amyl and the Sniffers", "category": "Rock", "genre": "punk/garage", "day": "Onsdag 12. august", "stage": "", "similar": ["The Stooges", "IDLES", "The Chats"], "spotify": "https://open.spotify.com/search/Amyl%20and%20the%20Sniffers", "link": "https://www.oyafestivalen.no/artister/amyl-and-the-sniffers"}, {"festival": "Øya", "artist": "Band of Horses", "category": "Rock", "genre": "indie/americana", "day": "Fredag 14. august", "stage": "", "similar": ["Fleet Foxes", "My Morning Jacket", "The Shins"], "spotify": "https://open.spotify.com/search/Band%20of%20Horses", "link": "https://www.oyafestivalen.no/artister/band-of-horses"}, {"festival": "Øya", "artist": "Geese", "category": "Rock", "genre": "indie/post-punk", "day": "Torsdag 13. august", "stage": "", "similar": ["Parquet Courts", "The Strokes", "black midi"], "spotify": "https://open.spotify.com/search/Geese", "link": "https://www.oyafestivalen.no/artister/geese"}, {"festival": "Øya", "artist": "Mogwai", "category": "Rock", "genre": "post-rock", "day": "Onsdag 12. august", "stage": "", "similar": ["Explosions in the Sky", "Godspeed You! Black Emperor", "Sigur Rós"], "spotify": "https://open.spotify.com/search/Mogwai", "link": "https://www.oyafestivalen.no/artister/mogwai"}, {"festival": "Øya", "artist": "SLOMOSA", "category": "Rock", "genre": "stoner rock", "day": "Fredag 14. august", "stage": "", "similar": ["Kyuss", "Queens of the Stone Age", "Truckfighters"], "spotify": "https://open.spotify.com/search/SLOMOSA", "link": "https://www.oyafestivalen.no/artister/slomosa"}, {"festival": "Øya", "artist": "Wilco", "category": "Rock", "genre": "indie rock/americana", "day": "Torsdag 13. august", "stage": "", "similar": ["Uncle Tupelo", "Son Volt", "The Jayhawks"], "spotify": "https://open.spotify.com/search/Wilco", "link": "https://www.oyafestivalen.no/artister/wilco"}, {"festival": "Øya", "artist": "Hayeminol", "category": "Rock", "genre": "punk/rock", "day": "Lørdag 15. august", "stage": "", "similar": ["IDLES", "Amyl and the Sniffers", "Lambrini Girls"], "spotify": "https://open.spotify.com/search/Hayeminol", "link": "https://www.oyafestivalen.no/artister/hayeminol"}, {"festival": "Øya", "artist": "Lambrini Girls", "category": "Rock", "genre": "punk", "day": "Torsdag 13. august", "stage": "", "similar": ["Bikini Kill", "IDLES", "Savages"], "spotify": "https://open.spotify.com/search/Lambrini%20Girls", "link": "https://www.oyafestivalen.no/artister/lambrini-girls"}, {"festival": "Øya", "artist": "Sunnan", "category": "Rock", "genre": "indie/rock", "day": "Onsdag 12. august", "stage": "", "similar": ["Alabama Shakes", "The Cardigans", "Anna Ternheim"], "spotify": "https://open.spotify.com/search/Sunnan", "link": "https://www.oyafestivalen.no/artister/sunnan"}, {"festival": "Øya", "artist": "Westside Cowboy", "category": "Rock", "genre": "gitarbasert indie", "day": "Fredag 14. august", "stage": "", "similar": ["Big Thief", "The Libertines", "MJ Lenderman"], "spotify": "https://open.spotify.com/search/Westside%20Cowboy", "link": "https://www.oyafestivalen.no/artister/westside-cowboy"}, {"festival": "Øya", "artist": "Clipse", "category": "Rap", "genre": "hiphop", "day": "Fredag 14. august", "stage": "", "similar": ["Pusha T", "Jay-Z", "Nas"], "spotify": "https://open.spotify.com/search/Clipse", "link": "https://www.oyafestivalen.no/artister/clipse"}, {"festival": "Øya", "artist": "Stig Brenner", "category": "Rap", "genre": "rap/pop", "day": "Fredag 14. august", "stage": "Amfiet", "similar": ["Post Malone", "Juice WRLD", "Travis Scott"], "spotify": "https://open.spotify.com/search/Stig%20Brenner", "link": "https://www.oyafestivalen.no/artister/stig-brenner"}, {"festival": "Øya", "artist": "Anakin Justin", "category": "Rap", "genre": "hiphop/R&B", "day": "Onsdag 12. august", "stage": "", "similar": ["6LACK", "Brent Faiyaz", "Don Toliver"], "spotify": "https://open.spotify.com/search/Anakin%20Justin", "link": "https://www.oyafestivalen.no/artister/anakin-justin"}, {"festival": "Øya", "artist": "Gjenfødt Kultur", "category": "Rap", "genre": "rap", "day": "Fredag 14. august", "stage": "", "similar": ["Karpe", "UNDERGRUNN", "BROCKHAMPTON"], "spotify": "https://open.spotify.com/search/Gjenf%C3%B8dt%20Kultur", "link": "https://www.oyafestivalen.no/artister/gjenfodt-kultur"}, {"festival": "Øya", "artist": "Jim Legxacy", "category": "Rap", "genre": "alternativ hiphop", "day": "Fredag 14. august", "stage": "", "similar": ["Dean Blunt", "J Hus", "slowthai"], "spotify": "https://open.spotify.com/search/Jim%20Legxacy", "link": "https://www.oyafestivalen.no/artister/jim-legaxcy"}, {"festival": "Øya", "artist": "Joshua Idehen", "category": "Rap", "genre": "spoken word/rap", "day": "Onsdag 12. august", "stage": "Klubben", "similar": ["Kae Tempest", "Ghostpoet", "The Streets"], "spotify": "https://open.spotify.com/search/Joshua%20Idehen", "link": "https://www.oyafestivalen.no/artister/joshua-idehen"}, {"festival": "Øya", "artist": "Alle Mine Hunder", "category": "Rap", "genre": "rap/elektronisk", "day": "Lørdag 15. august", "stage": "", "similar": ["Tacobitch", "Karpe", "Kakkmaddafakka"], "spotify": "https://open.spotify.com/search/Alle%20Mine%20Hunder", "link": "https://www.oyafestivalen.no/artister/alle-mine-hunder"}, {"festival": "Øya", "artist": "Dagny", "category": "Pop", "genre": "pop", "day": "Lørdag 15. august", "stage": "Amfiet", "similar": ["Sigrid", "Zara Larsson", "Robyn"], "spotify": "https://open.spotify.com/search/Dagny", "link": "https://www.oyafestivalen.no/artister/dagny"}, {"festival": "Øya", "artist": "Lily Allen", "category": "Pop", "genre": "britisk pop", "day": "Lørdag 15. august", "stage": "Amfiet", "similar": ["Kate Nash", "M.I.A.", "Amy Winehouse"], "spotify": "https://open.spotify.com/search/Lily%20Allen", "link": "https://www.oyafestivalen.no/artister/lily-allen"}, {"festival": "Øya", "artist": "SOMBR", "category": "Pop", "genre": "alternativ pop/rock", "day": "Fredag 14. august", "stage": "Amfiet", "similar": ["The 1975", "Joji", "Jeremy Zucker"], "spotify": "https://open.spotify.com/search/SOMBR", "link": "https://www.oyafestivalen.no/artister/sombr"}, {"festival": "Øya", "artist": "CMAT", "category": "Pop", "genre": "country/pop", "day": "Lørdag 15. august", "stage": "", "similar": ["Kacey Musgraves", "Orville Peck", "Dolly Parton"], "spotify": "https://open.spotify.com/search/CMAT", "link": "https://www.oyafestivalen.no/artister/cmat"}, {"festival": "Øya", "artist": "Marit Larsen", "category": "Pop", "genre": "akustisk pop/folk", "day": "Lørdag 15. august", "stage": "", "similar": ["Ingrid Michaelson", "Sara Bareilles", "Ane Brun"], "spotify": "https://open.spotify.com/search/Marit%20Larsen", "link": "https://www.oyafestivalen.no/artister/marit-larsen"}, {"festival": "Øya", "artist": "Bendik", "category": "Pop", "genre": "eksperimentell pop", "day": "Torsdag 13. august", "stage": "", "similar": ["Susanne Sundfør", "Jenny Hval", "AURORA"], "spotify": "https://open.spotify.com/search/Bendik", "link": "https://www.oyafestivalen.no/artister/bendik"}, {"festival": "Øya", "artist": "Candura", "category": "Pop", "genre": "bossa/disco/pop", "day": "Onsdag 12. august", "stage": "", "similar": ["Sade", "Astrud Gilberto", "Jessie Ware"], "spotify": "https://open.spotify.com/search/Candura", "link": "https://www.oyafestivalen.no/artister/candura"}, {"festival": "Øya", "artist": "Hannah Cohen", "category": "Pop", "genre": "indie pop", "day": "Onsdag 12. august", "stage": "", "similar": ["Weyes Blood", "Angel Olsen", "Julia Holter"], "spotify": "https://open.spotify.com/search/Hannah%20Cohen", "link": "https://www.oyafestivalen.no/artister/hannah-cohen"}, {"festival": "Øya", "artist": "Ea Othilde", "category": "Pop", "genre": "indie/rock-pop", "day": "Torsdag 13. august", "stage": "", "similar": ["girl in red", "Wolf Alice", "beabadoobee"], "spotify": "https://open.spotify.com/search/Ea%20Othilde", "link": "https://www.oyafestivalen.no/artister/ea-othilde"}, {"festival": "Øya", "artist": "ELIA", "category": "Pop", "genre": "mørk pop/R&B", "day": "Torsdag 13. august", "stage": "", "similar": ["BANKS", "Lorde", "Billie Eilish"], "spotify": "https://open.spotify.com/search/ELIA", "link": "https://www.oyafestivalen.no/artister/elia"}, {"festival": "Øya", "artist": "Girl Group", "category": "Pop", "genre": "alternativ pop", "day": "Lørdag 15. august", "stage": "", "similar": ["Wet Leg", "Let's Eat Grandma", "Charli XCX"], "spotify": "https://open.spotify.com/search/Girl%20Group", "link": "https://www.oyafestivalen.no/artister/girl-group"}, {"festival": "Øya", "artist": "May", "category": "Pop", "genre": "indie pop", "day": "Fredag 14. august", "stage": "", "similar": ["Clairo", "girl in red", "Men I Trust"], "spotify": "https://open.spotify.com/search/May", "link": "https://www.oyafestivalen.no/artister/may"}, {"festival": "Øya", "artist": "Hannah Storm", "category": "Pop", "genre": "emosjonell pop", "day": "Torsdag 13. august", "stage": "", "similar": ["Maggie Rogers", "HAIM", "Florence + The Machine"], "spotify": "https://open.spotify.com/search/Hannah%20Storm", "link": "https://www.oyafestivalen.no/artister/hannah-storm"}, {"festival": "Øya", "artist": "VEGARD", "category": "Pop", "genre": "norsk pop", "day": "Lørdag 15. august", "stage": "", "similar": ["Aksel", "Ruben", "Isak Danielson"], "spotify": "https://open.spotify.com/search/VEGARD", "link": "https://www.oyafestivalen.no/artister/vegard"}, {"festival": "Øya", "artist": "Underworld", "category": "Elektronisk", "genre": "techno/house", "day": "Lørdag 15. august", "stage": "", "similar": ["Orbital", "The Chemical Brothers", "Leftfield"], "spotify": "https://open.spotify.com/search/Underworld", "link": "https://www.oyafestivalen.no/artister/underworld"}, {"festival": "Øya", "artist": "TOMORA", "category": "Elektronisk", "genre": "alternativ elektronisk", "day": "Fredag 14. august", "stage": "", "similar": ["Röyksopp", "Moderat", "The Knife"], "spotify": "https://open.spotify.com/search/TOMORA", "link": "https://www.oyafestivalen.no/artister/tomora"}, {"festival": "Øya", "artist": "Oklou", "category": "Elektronisk", "genre": "futuristisk elektropop", "day": "Onsdag 12. august", "stage": "", "similar": ["Caroline Polachek", "Grimes", "FKA twigs"], "spotify": "https://open.spotify.com/search/Oklou", "link": "https://www.oyafestivalen.no/artister/oklou"}, {"festival": "Øya", "artist": "Getdown Services", "category": "Elektronisk", "genre": "elektronisk/post-punk", "day": "Fredag 14. august", "stage": "", "similar": ["Sleaford Mods", "Yard Act", "Dry Cleaning"], "spotify": "https://open.spotify.com/search/Getdown%20Services", "link": "https://www.oyafestivalen.no/artister/getdown-services"}, {"festival": "Øya", "artist": "Nonne", "category": "Elektronisk", "genre": "mørk elektronisk/indie", "day": "Onsdag 12. august", "stage": "", "similar": ["The Knife", "Austra", "Jenny Hval"], "spotify": "https://open.spotify.com/search/Nonne", "link": "https://www.oyafestivalen.no/artister/nonne"}, {"festival": "Øya", "artist": "Reolô", "category": "Elektronisk", "genre": "organisk elektronisk/folk/jazz", "day": "Torsdag 13. august", "stage": "", "similar": ["Röyksopp", "Mari Boine", "Valkyrien Allstars"], "spotify": "https://open.spotify.com/search/Reol%C3%B4", "link": "https://www.oyafestivalen.no/artister/reolo"}, {"festival": "Øya", "artist": "Blood Orange", "category": "R&B / soul", "genre": "alternativ R&B", "day": "Torsdag 13. august", "stage": "", "similar": ["Solange", "Frank Ocean", "Prince"], "spotify": "https://open.spotify.com/search/Blood%20Orange", "link": "https://www.oyafestivalen.no/artister/blood-orange"}, {"festival": "Øya", "artist": "Ravyn Lenae", "category": "R&B / soul", "genre": "moderne R&B", "day": "Lørdag 15. august", "stage": "", "similar": ["SZA", "Kelela", "Jorja Smith"], "spotify": "https://open.spotify.com/search/Ravyn%20Lenae", "link": "https://www.oyafestivalen.no/artister/ravyn-lenae"}, {"festival": "Øya", "artist": "Dijon", "category": "R&B / soul", "genre": "eksperimentell R&B/indie", "day": "Lørdag 15. august", "stage": "", "similar": ["Frank Ocean", "Sampha", "Bon Iver"], "spotify": "https://open.spotify.com/search/Dijon", "link": "https://www.oyafestivalen.no/artister/dijon"}, {"festival": "Øya", "artist": "Rochelle Jordan", "category": "R&B / soul", "genre": "klubb-R&B", "day": "Torsdag 13. august", "stage": "Klubben", "similar": ["Tinashe", "Kelela", "Aluna"], "spotify": "https://open.spotify.com/search/Rochelle%20Jordan", "link": "https://www.oyafestivalen.no/artister/rochelle-jordan"}, {"festival": "Øya", "artist": "Jalen Ngonda", "category": "R&B / soul", "genre": "klassisk soul", "day": "Torsdag 13. august", "stage": "", "similar": ["Marvin Gaye", "Al Green", "Leon Bridges"], "spotify": "https://open.spotify.com/search/Jalen%20Ngonda", "link": "https://www.oyafestivalen.no/artister/jalen-ngonda"}, {"festival": "Øya", "artist": "Sofi O", "category": "R&B / soul", "genre": "soul/R&B", "day": "Fredag 14. august", "stage": "", "similar": ["Snoh Aalegra", "Jorja Smith", "Cleo Sol"], "spotify": "https://open.spotify.com/search/Sofi%20O", "link": "https://www.oyafestivalen.no/artister/sofi-o"}, {"festival": "Øya", "artist": "Thomas Dybdahl", "category": "Singer-songwriter", "genre": "låtskriver", "day": "Fredag 14. august", "stage": "", "similar": ["José González", "Damien Rice", "Nick Drake"], "spotify": "https://open.spotify.com/search/Thomas%20Dybdahl", "link": "https://www.oyafestivalen.no/artister/thomas-dybdahl"}, {"festival": "Øya", "artist": "Annahstasia", "category": "Singer-songwriter", "genre": "soul/folk", "day": "Onsdag 12. august", "stage": "", "similar": ["Lianne La Havas", "Nina Simone", "Laura Marling"], "spotify": "https://open.spotify.com/search/Annahstasia", "link": "https://www.oyafestivalen.no/artister/annahstasia"}, {"festival": "Øya", "artist": "Dove Ellis", "category": "Singer-songwriter", "genre": "indie/folk", "day": "Onsdag 12. august", "stage": "", "similar": ["Phoebe Bridgers", "Lucy Dacus", "Adrianne Lenker"], "spotify": "https://open.spotify.com/search/Dove%20Ellis", "link": "https://www.oyafestivalen.no/artister/dove-ellis"}, {"festival": "Øya", "artist": "Ole Kirkeng", "category": "Singer-songwriter", "genre": "americana", "day": "Onsdag 12. august", "stage": "", "similar": ["Jason Isbell", "Tyler Childers", "Sturgill Simpson"], "spotify": "https://open.spotify.com/search/Ole%20Kirkeng", "link": "https://www.oyafestivalen.no/artister/ole-kirkeng"}, {"festival": "Øya", "artist": "Beth McBride", "category": "Singer-songwriter", "genre": "indie folk", "day": "Lørdag 15. august", "stage": "", "similar": ["Phoebe Bridgers", "Julien Baker", "Lucy Dacus"], "spotify": "https://open.spotify.com/search/Beth%20McBride", "link": "https://www.oyafestivalen.no/artister/beth-mcbride"}, {"festival": "Øya", "artist": "Norma", "category": "Singer-songwriter", "genre": "americana/folk", "day": "Lørdag 15. august", "stage": "", "similar": ["First Aid Kit", "Waxahatchee", "Lucinda Williams"], "spotify": "https://open.spotify.com/search/Norma", "link": "https://www.oyafestivalen.no/artister/norma"}, {"festival": "Øya", "artist": "Ragnhild og", "category": "Singer-songwriter", "genre": "vise/pop", "day": "Torsdag 13. august", "stage": "", "similar": ["Susanne Sundfør", "Hanne Hukkelberg", "Signe Marie Rustad"], "spotify": "https://open.spotify.com/search/Ragnhild%20og", "link": "https://www.oyafestivalen.no/artister/ragnhild-og"}, {"festival": "Øya", "artist": "Valkyrien Allstars", "category": "Folk / jazz / world", "genre": "norsk folk/rock", "day": "Lørdag 15. august", "stage": "", "similar": ["Gåte", "Hedningarna", "Mari Boine"], "spotify": "https://open.spotify.com/search/Valkyrien%20Allstars", "link": "https://www.oyafestivalen.no/artister/valkyrien-allstars"}, {"festival": "Øya", "artist": "Arthur Verocai", "category": "Folk / jazz / world", "genre": "orkestral jazz/bossa", "day": "Onsdag 12. august", "stage": "Amfiet", "similar": ["Jobim", "Marcos Valle", "Milton Nascimento"], "spotify": "https://open.spotify.com/search/Arthur%20Verocai", "link": "https://www.oyafestivalen.no/artister/arthur-verocai"}, {"festival": "Tons of Rock", "artist": "Iron Maiden", "category": "Heavy metal", "genre": "heavy metal", "day": "Torsdag 25. juni", "stage": "", "similar": ["Judas Priest", "Dio", "Saxon"], "spotify": "https://open.spotify.com/search/Iron%20Maiden", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Anthrax", "category": "Heavy metal", "genre": "thrash/heavy metal", "day": "Torsdag 25. juni", "stage": "", "similar": ["Megadeth", "Testament", "Exodus"], "spotify": "https://open.spotify.com/search/Anthrax", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "W.A.S.P.", "category": "Heavy metal", "genre": "heavy metal/shock rock", "day": "Lørdag 27. juni", "stage": "", "similar": ["Twisted Sister", "Alice Cooper", "Dokken"], "spotify": "https://open.spotify.com/search/W.A.S.P.", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Queensrÿche", "category": "Heavy metal", "genre": "progressiv heavy metal", "day": "Fredag 26. juni", "stage": "", "similar": ["Fates Warning", "Dream Theater", "Crimson Glory"], "spotify": "https://open.spotify.com/search/Queensr%C3%BFche", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Apocalyptica", "category": "Heavy metal", "genre": "symfonisk metal/cello metal", "day": "Torsdag 25. juni", "stage": "", "similar": ["Metallica", "Within Temptation", "Nightwish"], "spotify": "https://open.spotify.com/search/Apocalyptica", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "The Warning", "category": "Heavy metal", "genre": "hard rock/alternativ metal", "day": "Torsdag 25. juni", "stage": "", "similar": ["Halestorm", "The Pretty Reckless", "Plush"], "spotify": "https://open.spotify.com/search/The%20Warning", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Leprous", "category": "Heavy metal", "genre": "progressiv metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Haken", "Soen", "Karnivool"], "spotify": "https://open.spotify.com/search/Leprous", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Imminence", "category": "Heavy metal", "genre": "metalcore/post-hardcore", "day": "Torsdag 25. juni", "stage": "", "similar": ["Architects", "While She Sleeps", "Bad Omens"], "spotify": "https://open.spotify.com/search/Imminence", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Paleface Swiss", "category": "Heavy metal", "genre": "deathcore/hardcore", "day": "Torsdag 25. juni", "stage": "", "similar": ["Knocked Loose", "Slaughter to Prevail", "Kublai Khan TX"], "spotify": "https://open.spotify.com/search/Paleface%20Swiss", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Alice Cooper", "category": "Hard rock", "genre": "shock rock/hard rock", "day": "Torsdag 25. juni", "stage": "", "similar": ["KISS", "W.A.S.P.", "Rob Zombie"], "spotify": "https://open.spotify.com/search/Alice%20Cooper", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "D-A-D", "category": "Hard rock", "genre": "hard rock", "day": "Torsdag 25. juni", "stage": "", "similar": ["The Cult", "Backyard Babies", "The Hellacopters"], "spotify": "https://open.spotify.com/search/D-A-D", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "The Hives", "category": "Hard rock", "genre": "garage rock", "day": "Fredag 26. juni", "stage": "", "similar": ["Refused", "The Hellacopters", "Turbonegro"], "spotify": "https://open.spotify.com/search/The%20Hives", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Rival Sons", "category": "Hard rock", "genre": "hard rock/blues rock", "day": "Fredag 26. juni", "stage": "", "similar": ["Greta Van Fleet", "The Black Crowes", "Wolfmother"], "spotify": "https://open.spotify.com/search/Rival%20Sons", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Audrey Horne", "category": "Hard rock", "genre": "hard rock", "day": "Torsdag 25. juni", "stage": "", "similar": ["The Hellacopters", "Gluecifer", "Backyard Babies"], "spotify": "https://open.spotify.com/search/Audrey%20Horne", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "The Carburetors", "category": "Hard rock", "genre": "hard rock'n'roll", "day": "Onsdag 24. juni", "stage": "", "similar": ["Motörhead", "Turbonegro", "Backyard Babies"], "spotify": "https://open.spotify.com/search/The%20Carburetors", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Dogstar", "category": "Hard rock", "genre": "alternativ rock", "day": "Fredag 26. juni", "stage": "", "similar": ["Foo Fighters", "Our Lady Peace", "Silverchair"], "spotify": "https://open.spotify.com/search/Dogstar", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Storm", "category": "Hard rock", "genre": "rock", "day": "Fredag 26. juni", "stage": "", "similar": ["TNT", "Backstreet Girls", "The September When"], "spotify": "https://open.spotify.com/search/Storm", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Høst", "category": "Hard rock", "genre": "prog/hard rock", "day": "Fredag 26. juni", "stage": "", "similar": ["Aunt Mary", "Wishbone Ash", "Genesis"], "spotify": "https://open.spotify.com/search/H%C3%B8st", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "The Offspring", "category": "Punk / hardcore", "genre": "punk rock", "day": "Onsdag 24. juni", "stage": "", "similar": ["Green Day", "Bad Religion", "NOFX"], "spotify": "https://open.spotify.com/search/The%20Offspring", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Suicidal Tendencies", "category": "Punk / hardcore", "genre": "crossover thrash/hardcore", "day": "Torsdag 25. juni", "stage": "", "similar": ["D.R.I.", "Cro-Mags", "Body Count"], "spotify": "https://open.spotify.com/search/Suicidal%20Tendencies", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "The Baboon Show", "category": "Punk / hardcore", "genre": "punk rock", "day": "Torsdag 25. juni", "stage": "", "similar": ["The Interrupters", "Refused", "The Distillers"], "spotify": "https://open.spotify.com/search/The%20Baboon%20Show", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Kublai Khan TX", "category": "Punk / hardcore", "genre": "hardcore", "day": "Fredag 26. juni", "stage": "", "similar": ["Knocked Loose", "Jesus Piece", "Hatebreed"], "spotify": "https://open.spotify.com/search/Kublai%20Khan%20TX", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Turdus Musicus", "category": "Punk / hardcore", "genre": "hardcore", "day": "Onsdag 24. juni", "stage": "", "similar": ["Bokassa", "Cancer Bats", "Every Time I Die"], "spotify": "https://open.spotify.com/search/Turdus%20Musicus", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Koco Franco", "category": "Punk / hardcore", "genre": "punk rock", "day": "Fredag 26. juni", "stage": "", "similar": ["The Dogs", "Turbonegro", "Amyl and the Sniffers"], "spotify": "https://open.spotify.com/search/Koco%20Franco", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Die Spitz", "category": "Punk / hardcore", "genre": "punk/noise rock", "day": "Onsdag 24. juni", "stage": "", "similar": ["Amyl and the Sniffers", "Lambrini Girls", "Destroy Boys"], "spotify": "https://open.spotify.com/search/Die%20Spitz", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Bring Me the Horizon", "category": "Alternativ / modern", "genre": "alternativ metal/metalcore", "day": "Onsdag 24. juni", "stage": "", "similar": ["Bad Omens", "Architects", "Linkin Park"], "spotify": "https://open.spotify.com/search/Bring%20Me%20the%20Horizon", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Limp Bizkit", "category": "Alternativ / modern", "genre": "nu metal/rap metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Korn", "Papa Roach", "Linkin Park"], "spotify": "https://open.spotify.com/search/Limp%20Bizkit", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "A Perfect Circle", "category": "Alternativ / modern", "genre": "alternativ rock/prog", "day": "Lørdag 27. juni", "stage": "", "similar": ["Tool", "Puscifer", "Deftones"], "spotify": "https://open.spotify.com/search/A%20Perfect%20Circle", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Yungblud", "category": "Alternativ / modern", "genre": "alternativ rock/pop-punk", "day": "Fredag 26. juni", "stage": "", "similar": ["Machine Gun Kelly", "Bring Me the Horizon", "Palaye Royale"], "spotify": "https://open.spotify.com/search/YUNGBLUD", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Tom Morello", "category": "Alternativ / modern", "genre": "rap metal/alternativ rock", "day": "Fredag 26. juni", "stage": "", "similar": ["Rage Against the Machine", "Audioslave", "Prophets of Rage"], "spotify": "https://open.spotify.com/search/Tom%20Morello", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Grandson", "category": "Alternativ / modern", "genre": "alternativ rock", "day": "Torsdag 25. juni", "stage": "", "similar": ["Yungblud", "Nothing But Thieves", "Fever 333"], "spotify": "https://open.spotify.com/search/Grandson", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Yonaka", "category": "Alternativ / modern", "genre": "alternativ rock", "day": "Torsdag 25. juni", "stage": "", "similar": ["Nova Twins", "Marmozets", "Against The Current"], "spotify": "https://open.spotify.com/search/YONAKA", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "President", "category": "Alternativ / modern", "genre": "alternativ metal", "day": "Onsdag 24. juni", "stage": "", "similar": ["Sleep Token", "Bad Omens", "Deftones"], "spotify": "https://open.spotify.com/search/President", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Ego Kill Talent", "category": "Alternativ / modern", "genre": "alternativ rock", "day": "Lørdag 27. juni", "stage": "", "similar": ["Nothing More", "Royal Blood", "Dead Poet Society"], "spotify": "https://open.spotify.com/search/Ego%20Kill%20Talent", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Black Debbath", "category": "Alternativ / modern", "genre": "hard rock/stoner", "day": "Onsdag 24. juni", "stage": "", "similar": ["Turbonegro", "Motorpsycho", "The Good The Bad and The Zugly"], "spotify": "https://open.spotify.com/search/Black%20Debbath", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Mayhem", "category": "Ekstremmetal", "genre": "black metal", "day": "Fredag 26. juni", "stage": "", "similar": ["Darkthrone", "Emperor", "Gorgoroth"], "spotify": "https://open.spotify.com/search/Mayhem", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Behemoth", "category": "Ekstremmetal", "genre": "blackened death metal", "day": "Fredag 26. juni", "stage": "", "similar": ["Watain", "Septicflesh", "Belphegor"], "spotify": "https://open.spotify.com/search/Behemoth", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Sepultura", "category": "Ekstremmetal", "genre": "thrash/groove metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Soulfly", "Machine Head", "Pantera"], "spotify": "https://open.spotify.com/search/Sepultura", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Cavalera performs Chaos A.D.", "category": "Ekstremmetal", "genre": "thrash/groove metal", "day": "Onsdag 24. juni", "stage": "", "similar": ["Sepultura", "Soulfly", "Nailbomb"], "spotify": "https://open.spotify.com/search/Cavalera", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Death To All", "category": "Ekstremmetal", "genre": "technical death metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Death", "Obscura", "Cynic"], "spotify": "https://open.spotify.com/search/Death%20To%20All", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Possessed", "category": "Ekstremmetal", "genre": "death metal", "day": "Fredag 26. juni", "stage": "", "similar": ["Death", "Morbid Angel", "Deicide"], "spotify": "https://open.spotify.com/search/Possessed", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Blood Incantation", "category": "Ekstremmetal", "genre": "death metal/prog", "day": "Onsdag 24. juni", "stage": "", "similar": ["Morbid Angel", "Tomb Mold", "Atheist"], "spotify": "https://open.spotify.com/search/Blood%20Incantation", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Blood Red Throne", "category": "Ekstremmetal", "genre": "death metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Cannibal Corpse", "Dying Fetus", "Suffocation"], "spotify": "https://open.spotify.com/search/Blood%20Red%20Throne", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Gatecreeper", "category": "Ekstremmetal", "genre": "death metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Entombed", "Tomb Mold", "Frozen Soul"], "spotify": "https://open.spotify.com/search/Gatecreeper", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Gaerea", "category": "Ekstremmetal", "genre": "black metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Mgła", "Uada", "Harakiri for the Sky"], "spotify": "https://open.spotify.com/search/Gaerea", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Jordsjuk", "category": "Ekstremmetal", "genre": "black metal", "day": "Onsdag 24. juni", "stage": "", "similar": ["Khold", "Taake", "1349"], "spotify": "https://open.spotify.com/search/Jordsjuk", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Angell", "category": "Ekstremmetal", "genre": "blackened death metal", "day": "Torsdag 25. juni", "stage": "", "similar": ["Vitriol", "Ulcerate", "Blood Red Throne"], "spotify": "https://open.spotify.com/search/Angell", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Baphy", "category": "Ekstremmetal", "genre": "metal", "day": "Lørdag 27. juni", "stage": "", "similar": ["Sylvaine", "Myrkur", "Hexvessel"], "spotify": "https://open.spotify.com/search/Baphy", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Slay Squad", "category": "Ekstremmetal", "genre": "metal/hardcore", "day": "Lørdag 27. juni", "stage": "", "similar": ["Bokassa", "Power Trip", "Municipal Waste"], "spotify": "https://open.spotify.com/search/Slay%20Squad", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Babymetal", "category": "Prog / art / annet", "genre": "kawaii metal", "day": "Onsdag 24. juni", "stage": "", "similar": ["Electric Callboy", "Poppy", "Hanabie."], "spotify": "https://open.spotify.com/search/BABYMETAL", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Eivør", "category": "Prog / art / annet", "genre": "folk/prog", "day": "Fredag 26. juni", "stage": "", "similar": ["Wardruna", "Myrkur", "Aurora"], "spotify": "https://open.spotify.com/search/Eiv%C3%B8r", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Elder", "category": "Prog / art / annet", "genre": "progressiv stoner/psych", "day": "Fredag 26. juni", "stage": "", "similar": ["King Buffalo", "All Them Witches", "Mastodon"], "spotify": "https://open.spotify.com/search/Elder", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "BFD – A Tribute to Bathory", "category": "Prog / art / annet", "genre": "tribute/extreme metal", "day": "Onsdag 24. juni", "stage": "", "similar": ["Bathory", "Watain", "Enslaved"], "spotify": "https://open.spotify.com/search/Bathory", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "You Know Who", "category": "Prog / art / annet", "genre": "groove rock", "day": "Lørdag 27. juni", "stage": "", "similar": ["The Good The Bad and The Zugly", "Kvelertak", "Bokassa"], "spotify": "https://open.spotify.com/search/You%20Know%20Who", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Dumdum Boys", "category": "Prog / art / annet", "genre": "norsk rock", "day": "Onsdag 24. juni", "stage": "", "similar": ["deLillos", "Raga Rockers", "Jokke & Valentinerne"], "spotify": "https://open.spotify.com/search/Dumdum%20Boys", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Raga Rockers", "category": "Prog / art / annet", "genre": "norsk rock", "day": "Fredag 26. juni", "stage": "", "similar": ["Dumdum Boys", "Jokke & Valentinerne", "deLillos"], "spotify": "https://open.spotify.com/search/Raga%20Rockers", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "The Pretty Reckless", "category": "Prog / art / annet", "genre": "hard rock/alternativ", "day": "Fredag 26. juni", "stage": "", "similar": ["Halestorm", "In This Moment", "Dorothy"], "spotify": "https://open.spotify.com/search/The%20Pretty%20Reckless", "link": "https://www.tonsofrock.no/en/program"}];
-    const MUSTSEE = [{"artist": "Nick Cave & The Bad Seeds", "why": "Mørk nerve, stor låtskriving og helt i din gate."}, {"artist": "The Cure", "why": "Ikonisk mørk alternativ rock med atmosfære."}, {"artist": "Mogwai", "why": "Tung, instrumental kraft og stor dynamikk."}, {"artist": "SLOMOSA", "why": "Tung stoner-rock med riff og groove."}, {"artist": "Thomas Dybdahl", "why": "Sterk låtskriver med musikalsk tyngde."}, {"artist": "Annahstasia", "why": "Vokal og låtskriving som kan treffe hardt."}, {"artist": "Iron Maiden", "why": "Klassisk metal på toppnivå live."}, {"artist": "Alice Cooper", "why": "Stor scene-personlighet og tung rockteater-energi."}, {"artist": "Rival Sons", "why": "Hard rock med blues-nerve som kan passe deg godt."}, {"artist": "A Perfect Circle", "why": "Mørk, melodisk og sofistikert tungrock."}, {"artist": "Mayhem", "why": "Hvis du vil ha den mørkere, mer kompromissløse siden."}];
-    const state = {
-      view: 'festivaler',
-      search: '',
-      festival: 'Alle',
-      day: 'Alle',
-      favorites: JSON.parse(localStorage.getItem('festival-favorites') || '[]')
-    };
-
-    const dayOrder = [
-      'Onsdag 24. juni','Torsdag 25. juni','Fredag 26. juni','Lørdag 27. juni',
-      'Onsdag 12. august','Torsdag 13. august','Fredag 14. august','Lørdag 15. august',
-      '[Unverified] dag ikke funnet i sluttprogrammet'
-    ];
-
-    const content = document.getElementById('content');
-    const searchInput = document.getElementById('search');
-    const festivalFilter = document.getElementById('festivalFilter');
-    const dayChips = document.getElementById('dayChips');
-
-    function saveFavorites() {
-      localStorage.setItem('festival-favorites', JSON.stringify(state.favorites));
-    }
-
-    function toggleFavorite(artist) {
-      const i = state.favorites.indexOf(artist);
-      if (i >= 0) state.favorites.splice(i, 1);
-      else state.favorites.push(artist);
-      saveFavorites();
-      render();
-    }
-
-    function uniqueDays() {
-      const days = [...new Set(DATA.map(x => x.day))];
-      return dayOrder.filter(d => days.includes(d)).concat(days.filter(d => !dayOrder.includes(d)));
-    }
-
-    function renderDayChips() {
-      const days = ['Alle', ...uniqueDays()];
-      dayChips.innerHTML = days.map(day => `
-        <button class="chip ${state.day === day ? 'active' : ''}" data-day="${day.replace(/"/g, '&quot;')}">${day}</button>
-      `).join('');
-      dayChips.querySelectorAll('.chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.day = btn.dataset.day;
-          render();
-        });
-      });
-    }
-
-    function filtered() {
-      const q = state.search.trim().toLowerCase();
-      return DATA.filter(item => {
-        const hay = [item.artist, item.genre, item.category, item.festival, ...(item.similar || [])].join(' ').toLowerCase();
-        const matchesSearch = !q || hay.includes(q);
-        const matchesFestival = state.festival === 'Alle' || item.festival === state.festival;
-        const matchesDay = state.day === 'Alle' || item.day === state.day;
-        return matchesSearch && matchesFestival && matchesDay;
-      });
-    }
-
-    function grouped(items, by='category') {
-      const map = new Map();
-      items.forEach(item => {
-        const key = by === 'festival-category' ? `${item.festival}|||${item.category}` : item[by];
-        if (!map.has(key)) map.set(key, []);
-        map.get(key).push(item);
-      });
-      return [...map.entries()];
-    }
-
-    function card(item) {
-      const active = state.favorites.includes(item.artist);
-      const stage = item.stage ? ` · ${item.stage}` : '';
-      return `
-        <div class="card">
-          <div class="row">
-            <div class="titleRow">
-              <div class="titleWrap">
-                <div class="title">${item.artist}</div>
-                <div class="sub">${item.festival} · ${item.category} · ${item.genre}</div>
-                <div class="meta">${item.day}${stage}</div>
-                <div class="pill">Kan minne om: ${item.similar.join(', ')}</div>
-              </div>
-            </div>
-            <div class="actions">
-              <button class="btn fav ${active ? 'active' : ''}" data-fav="${item.artist.replace(/"/g, '&quot;')}">${active ? '★ Favoritt' : '☆ Favoritt'}</button>
-              <a class="btn" href="${item.spotify}" target="_blank" rel="noopener noreferrer">Spotify</a>
-              <a class="btn" href="${item.link}" target="_blank" rel="noopener noreferrer">Festival</a>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function bindFavButtons() {
-      content.querySelectorAll('[data-fav]').forEach(btn => {
-        btn.addEventListener('click', () => toggleFavorite(btn.dataset.fav));
-      });
-    }
-
-    function renderFestivaler() {
-      const items = filtered();
-      if (!items.length) {
-        content.innerHTML = `<div class="empty">Ingen treff med dette søket/filteret.</div>`;
-        return;
-      }
-      const groups = grouped(items, 'festival-category');
-      content.innerHTML = groups.map(([key, arr]) => {
-        const [festival, category] = key.split('|||');
-        return `
-          <details open>
-            <summary>${festival} · ${category} <span class="count">(${arr.length})</span></summary>
-            <div class="cards">${arr.map(card).join('')}</div>
-          </details>
-        `;
-      }).join('');
-      bindFavButtons();
-    }
-
-
-    function renderBorSe() {
-      const lookup = new Map(DATA.map(item => [item.artist, item]));
-      const items = MUSTSEE.map(x => Object.assign({}, lookup.get(x.artist), {why: x.why})).filter(Boolean);
-      content.innerHTML = items.map(item => `
-        <div class="card">
-          <div class="row">
-            <div class="titleRow">
-              <div class="titleWrap">
-                <div class="title">${item.artist}</div>
-                <div class="sub">${item.festival} · ${item.category} · ${item.genre}</div>
-                <div class="meta">${item.day}${item.stage ? ' · ' + item.stage : ''}</div>
-                <div class="why">${item.why}</div>
-              </div>
-            </div>
-            <div class="actions">
-              <button class="btn fav ${state.favorites.includes(item.artist) ? 'active' : ''}" data-fav="${item.artist.replace(/"/g, '&quot;')}">${state.favorites.includes(item.artist) ? '★ Favoritt' : '☆ Favoritt'}</button>
-              <a class="btn" href="${item.spotify}" target="_blank" rel="noopener noreferrer">Spotify</a>
-              <a class="btn" href="${item.link}" target="_blank" rel="noopener noreferrer">Festival</a>
-            </div>
-          </div>
-        </div>
-      `).join('');
-      bindFavButtons();
-    }
-
-    function renderFavoritter() {
-      const items = filtered().filter(item => state.favorites.includes(item.artist));
-      if (!items.length) {
-        content.innerHTML = `<div class="empty">Ingen favoritter ennå. Trykk ☆ Favoritt på artistkortene, så dukker de opp her.</div>`;
-        return;
-      }
-      const groups = grouped(items, 'day');
-      const ordered = dayOrder.filter(d => groups.find(([day]) => day === d)).map(day => groups.find(([d]) => d === day));
-      content.innerHTML = ordered.map(([day, arr]) => `
-        <details open>
-          <summary>${day} <span class="count">(${arr.length})</span></summary>
-          <div class="cards">${arr.map(card).join('')}</div>
-        </details>
-      `).join('');
-      bindFavButtons();
-    }
-
-    function renderPlan() {
-      const items = DATA.filter(item => state.favorites.includes(item.artist));
-      if (!items.length) {
-        content.innerHTML = `<div class="empty">Min plan er tom. Legg til favoritter først, så får du en enkel tidsplan gruppert etter festivaldag.</div>`;
-        return;
-      }
-      const groups = grouped(items, 'day');
-      const ordered = dayOrder.filter(d => groups.find(([day]) => day === d)).map(day => groups.find(([d]) => d === day));
-      content.innerHTML = ordered.map(([day, arr]) => `
-        <details open>
-          <summary>${day} <span class="count">(${arr.length} valgt)</span></summary>
-          <div class="cards">${arr.map(card).join('')}</div>
-        </details>
-      `).join('');
-      bindFavButtons();
-    }
-
-    function renderAbout() {
-      content.innerHTML = `
-        <div class="empty">
-          <strong>Nytt i v2</strong><br><br>
-          • ryddet topptekst uten interne referanser<br>
-          • egen fane for «Bør se»<br>
-          • Twisted Sister fjernet fra Tons-delen<br>
-          • favoritter lagres lokalt på mobilen<br>
-          • viser fortsatt enkel «Min plan» basert på valgene dine<br><br>
-          <strong>Merk</strong><br>
-          Øya-lenkene går til artistsider. Flere Tons-lenker går til programoversikten fordi åpen programvisning ikke ga like stabile individuelle artistsider.
-        </div>
-      `;
-    }
-
-    function render() {
-      document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.view === state.view));
-      if (state.view === 'festivaler') renderFestivaler();
-      else if (state.view === 'borses') renderBorSe();
-      else if (state.view === 'favoritter') renderFavoritter();
-      else if (state.view === 'plan') renderPlan();
-      else renderAbout();
-    }
-
-    document.querySelectorAll('.tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        state.view = btn.dataset.view;
-        render();
-      });
-    });
-
-    searchInput.addEventListener('input', e => {
-      state.search = e.target.value;
-      render();
-    });
-
-    festivalFilter.addEventListener('change', e => {
-      state.festival = e.target.value;
-      render();
-    });
-
-    renderDayChips();
-    render();
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=4').catch(() => null);
-      });
-    }
-  </script>
-</body>
-</html>
+<html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115"><meta name="description" content="Festivalplan v5 for Øya og Tons of Rock med favoritter, bør se og personlig plan.">
+<link rel="manifest" href="manifest.json"><title>Festivalplan v5</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--panel2:#1f2430;--card:#131823;--text:#f4f7fb;--muted:#cbd5e1;--border:#2c3442;--accent:#86efac;--btn:#2a3140;--btn2:#3a4456;--star:#facc15}
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif} body{-webkit-text-size-adjust:100%}
+.app{max-width:980px;margin:0 auto;padding:16px 16px 28px} h1{margin:0 0 8px;font-size:1.55rem;line-height:1.15} p{margin:0}
+.lead{color:#e2e8f0;line-height:1.45;margin-bottom:8px;font-size:.97rem}.note{color:var(--muted);line-height:1.45;margin-bottom:14px;font-size:.9rem}.bar{position:static;background:transparent;padding:0 0 12px}
+.tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0 10px}.tab{background:var(--btn);color:var(--text);border:none;border-radius:10px;min-height:42px;font-size:.88rem;padding:10px 6px;cursor:pointer}.tab.active{background:var(--btn2)}
+.toolbar{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px} input[type="search"],select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:10px;min-height:42px;padding:10px 12px;font-size:.95rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:var(--panel2);color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:8px 10px;font-size:.85rem;cursor:pointer}.chip.active{color:var(--text);border-color:#4b5563}
+details{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px} summary{list-style:none;cursor:pointer;padding:14px 16px;background:var(--panel2);font-weight:700;display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:.98rem} summary::-webkit-details-marker{display:none}
+.count{color:var(--muted);font-weight:600;font-size:.9rem;white-space:nowrap}.cards{padding:10px}.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}.card:last-child{margin-bottom:0}
+.title{font-weight:700;color:#fff;font-size:1rem;line-height:1.25}.sub{color:var(--muted);font-size:.9rem;margin-top:4px;line-height:1.35}.meta{color:var(--accent);font-size:.9rem;font-weight:600;margin-top:6px;line-height:1.35}.why{color:var(--muted);font-size:.92rem;line-height:1.45;margin-top:8px}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.btn{background:var(--btn);color:var(--text);border:none;border-radius:10px;min-height:42px;padding:10px 8px;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.92rem;cursor:pointer}.btn:hover{background:var(--btn2)}.fav.active{color:var(--star)}
+.empty{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;color:var(--muted);line-height:1.5}.pill{display:inline-block;margin-top:6px;background:#243041;color:#dbeafe;border-radius:999px;padding:5px 8px;font-size:.78rem}.footer{color:var(--muted);font-size:.85rem;line-height:1.5;margin-top:16px}
+@media (min-width:721px){.app{padding:24px}h1{font-size:1.9rem}.tabs{grid-template-columns:repeat(5,1fr)}.toolbar{grid-template-columns:1.2fr .8fr}.actions{width:auto;grid-template-columns:auto auto auto}}
+</style></head><body>
+<div class="app"><div class="bar"><h1>Festivalplan v5</h1><p class="lead">Øya + Tons of Rock i én mobilvennlig PWA, med favoritter, «bør se» og personlig plan.</p><p class="note">Dette er en ren nybygget v5. Twisted Sister er fjernet fra Tons of Rock-delen.</p>
+<div class="tabs"><button class="tab active" data-view="festivaler">Festivaler</button><button class="tab" data-view="borses">Bør se</button><button class="tab" data-view="favoritter">Favoritter</button><button class="tab" data-view="plan">Min plan</button><button class="tab" data-view="om">Om</button></div>
+<div class="toolbar"><input id="search" type="search" placeholder="Søk artist, sjanger eller lignende …"><select id="festivalFilter"><option value="Alle">Alle festivaler</option><option value="Øya">Øya</option><option value="Tons of Rock">Tons of Rock</option></select></div>
+<div class="chips" id="dayChips"></div></div><main id="content"></main><div class="footer">Hvis du ser “Festivalplan v5” øverst, er riktig versjon lastet.</div></div>
+<script>
+const DATA = [{"festival": "Øya", "artist": "The Cure", "category": "Rock", "genre": "alternativ/post-punk", "day": "Onsdag 12. august", "stage": "Amfiet", "similar": ["Joy Division", "Siouxsie and the Banshees", "New Order"], "spotify": "https://open.spotify.com/search/The%20Cure", "link": "https://www.oyafestivalen.no/artister/the-cure"}, {"festival": "Øya", "artist": "Nick Cave & The Bad Seeds", "category": "Rock", "genre": "alternativ rock", "day": "Torsdag 13. august", "stage": "Amfiet", "similar": ["Tom Waits", "Leonard Cohen", "PJ Harvey"], "spotify": "https://open.spotify.com/search/Nick%20Cave%20%26%20The%20Bad%20Seeds", "link": "https://www.oyafestivalen.no/artister/nick-cave-and-the-bad-seeds"}, {"festival": "Øya", "artist": "Mogwai", "category": "Rock", "genre": "post-rock", "day": "Onsdag 12. august", "stage": "", "similar": ["Explosions in the Sky", "Godspeed You! Black Emperor", "Sigur Rós"], "spotify": "https://open.spotify.com/search/Mogwai", "link": "https://www.oyafestivalen.no/artister/mogwai"}, {"festival": "Øya", "artist": "SLOMOSA", "category": "Rock", "genre": "stoner rock", "day": "Fredag 14. august", "stage": "", "similar": ["Kyuss", "Queens of the Stone Age", "Truckfighters"], "spotify": "https://open.spotify.com/search/SLOMOSA", "link": "https://www.oyafestivalen.no/artister/slomosa"}, {"festival": "Øya", "artist": "Thomas Dybdahl", "category": "Singer-songwriter", "genre": "låtskriver", "day": "Fredag 14. august", "stage": "", "similar": ["José González", "Damien Rice", "Nick Drake"], "spotify": "https://open.spotify.com/search/Thomas%20Dybdahl", "link": "https://www.oyafestivalen.no/artister/thomas-dybdahl"}, {"festival": "Øya", "artist": "Annahstasia", "category": "Singer-songwriter", "genre": "soul/folk", "day": "Onsdag 12. august", "stage": "", "similar": ["Lianne La Havas", "Nina Simone", "Laura Marling"], "spotify": "https://open.spotify.com/search/Annahstasia", "link": "https://www.oyafestivalen.no/artister/annahstasia"}, {"festival": "Øya", "artist": "Ole Kirkeng", "category": "Singer-songwriter", "genre": "americana", "day": "Onsdag 12. august", "stage": "", "similar": ["Jason Isbell", "Tyler Childers", "Sturgill Simpson"], "spotify": "https://open.spotify.com/search/Ole%20Kirkeng", "link": "https://www.oyafestivalen.no/artister/ole-kirkeng"}, {"festival": "Øya", "artist": "Dagny", "category": "Pop", "genre": "pop", "day": "Lørdag 15. august", "stage": "Amfiet", "similar": ["Sigrid", "Zara Larsson", "Robyn"], "spotify": "https://open.spotify.com/search/Dagny", "link": "https://www.oyafestivalen.no/artister/dagny"}, {"festival": "Øya", "artist": "Underworld", "category": "Elektronisk", "genre": "techno/house", "day": "Lørdag 15. august", "stage": "", "similar": ["Orbital", "The Chemical Brothers", "Leftfield"], "spotify": "https://open.spotify.com/search/Underworld", "link": "https://www.oyafestivalen.no/artister/underworld"}, {"festival": "Tons of Rock", "artist": "Iron Maiden", "category": "Heavy metal", "genre": "heavy metal", "day": "Torsdag 25. juni", "stage": "", "similar": ["Judas Priest", "Dio", "Saxon"], "spotify": "https://open.spotify.com/search/Iron%20Maiden", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Alice Cooper", "category": "Hard rock", "genre": "shock rock/hard rock", "day": "Torsdag 25. juni", "stage": "", "similar": ["KISS", "W.A.S.P.", "Rob Zombie"], "spotify": "https://open.spotify.com/search/Alice%20Cooper", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Rival Sons", "category": "Hard rock", "genre": "hard rock/blues rock", "day": "Fredag 26. juni", "stage": "", "similar": ["Greta Van Fleet", "The Black Crowes", "Wolfmother"], "spotify": "https://open.spotify.com/search/Rival%20Sons", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "A Perfect Circle", "category": "Alternativ / modern", "genre": "alternativ rock/prog", "day": "Lørdag 27. juni", "stage": "", "similar": ["Tool", "Puscifer", "Deftones"], "spotify": "https://open.spotify.com/search/A%20Perfect%20Circle", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Mayhem", "category": "Ekstremmetal", "genre": "black metal", "day": "Fredag 26. juni", "stage": "", "similar": ["Darkthrone", "Emperor", "Gorgoroth"], "spotify": "https://open.spotify.com/search/Mayhem", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "The Offspring", "category": "Punk / hardcore", "genre": "punk rock", "day": "Onsdag 24. juni", "stage": "", "similar": ["Green Day", "Bad Religion", "NOFX"], "spotify": "https://open.spotify.com/search/The%20Offspring", "link": "https://www.tonsofrock.no/en/program"}, {"festival": "Tons of Rock", "artist": "Babymetal", "category": "Prog / art / annet", "genre": "kawaii metal", "day": "Onsdag 24. juni", "stage": "", "similar": ["Electric Callboy", "Poppy", "Hanabie."], "spotify": "https://open.spotify.com/search/BABYMETAL", "link": "https://www.tonsofrock.no/en/program"}];
+const MUSTSEE = [{"artist": "Nick Cave & The Bad Seeds", "why": "Mørk nerve, stor låtskriving og helt i din gate."}, {"artist": "The Cure", "why": "Ikonisk mørk alternativ rock med atmosfære."}, {"artist": "Mogwai", "why": "Tung, instrumental kraft og stor dynamikk."}, {"artist": "SLOMOSA", "why": "Tung stoner-rock med riff og groove."}, {"artist": "Thomas Dybdahl", "why": "Sterk låtskriver med musikalsk tyngde."}, {"artist": "Annahstasia", "why": "Vokal og låtskriving som kan treffe hardt."}, {"artist": "Iron Maiden", "why": "Klassisk metal på toppnivå live."}, {"artist": "Alice Cooper", "why": "Stor scene-personlighet og tung rockteater-energi."}, {"artist": "Rival Sons", "why": "Hard rock med blues-nerve som kan passe deg godt."}, {"artist": "A Perfect Circle", "why": "Mørk, melodisk og sofistikert tungrock."}, {"artist": "Mayhem", "why": "Hvis du vil ha den mørkere, mer kompromissløse siden."}];
+const state = {view:'festivaler',search:'',festival:'Alle',day:'Alle',favorites: JSON.parse(localStorage.getItem('festival-favorites-v5') || '[]')};
+const dayOrder = ['Onsdag 24. juni','Torsdag 25. juni','Fredag 26. juni','Lørdag 27. juni','Onsdag 12. august','Torsdag 13. august','Fredag 14. august','Lørdag 15. august'];
+const content = document.getElementById('content'), searchInput = document.getElementById('search'), festivalFilter = document.getElementById('festivalFilter'), dayChips = document.getElementById('dayChips');
+function saveFavorites(){localStorage.setItem('festival-favorites-v5', JSON.stringify(state.favorites))}
+function toggleFavorite(artist){const i=state.favorites.indexOf(artist); if(i>=0) state.favorites.splice(i,1); else state.favorites.push(artist); saveFavorites(); render()}
+function uniqueDays(){const days=[...new Set(DATA.map(x=>x.day))]; return dayOrder.filter(d=>days.includes(d))}
+function renderDayChips(){const days=['Alle'].concat(uniqueDays()); dayChips.innerHTML=days.map(day=>'<button class="chip '+(state.day===day?'active':'')+'" data-day="'+day+'">'+day+'</button>').join(''); dayChips.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click',()=>{state.day=btn.dataset.day; render()}))}
+function filtered(){const q=state.search.trim().toLowerCase(); return DATA.filter(item=>{const hay=[item.artist,item.genre,item.category,item.festival].concat(item.similar||[]).join(' ').toLowerCase(); return (!q||hay.includes(q))&&(state.festival==='Alle'||item.festival===state.festival)&&(state.day==='Alle'||item.day===state.day)})}
+function grouped(items, by){const map=new Map(); items.forEach(item=>{const key=by==='festival-category'?(item.festival+'|||'+item.category):item[by]; if(!map.has(key)) map.set(key,[]); map.get(key).push(item)}); return Array.from(map.entries())}
+function card(item){const active=state.favorites.includes(item.artist); return '<div class="card"><div class="title">'+item.artist+'</div><div class="sub">'+item.festival+' · '+item.category+' · '+item.genre+'</div><div class="meta">'+item.day+(item.stage?' · '+item.stage:'')+'</div><div class="pill">Kan minne om: '+item.similar.join(', ')+'</div><div class="actions"><button class="btn fav '+(active?'active':'')+'" data-fav="'+item.artist+'">'+(active?'★ Favoritt':'☆ Favoritt')+'</button><a class="btn" href="'+item.spotify+'" target="_blank" rel="noopener noreferrer">Spotify</a><a class="btn" href="'+item.link+'" target="_blank" rel="noopener noreferrer">Festival</a></div></div>'}
+function bindFavButtons(){content.querySelectorAll('[data-fav]').forEach(btn=>btn.addEventListener('click',()=>toggleFavorite(btn.dataset.fav)))}
+function renderFestivaler(){const items=filtered(); if(!items.length){content.innerHTML='<div class="empty">Ingen treff.</div>'; return} const groups=grouped(items,'festival-category'); content.innerHTML=groups.map(([key,arr])=>{const parts=key.split('|||'); return '<details open><summary>'+parts[0]+' · '+parts[1]+' <span class="count">('+arr.length+')</span></summary><div class="cards">'+arr.map(card).join('')+'</div></details>'}).join(''); bindFavButtons()}
+function renderBorSe(){const lookup=new Map(DATA.map(item=>[item.artist,item])); const items=MUSTSEE.map(x=>{const base=lookup.get(x.artist); return base?Object.assign({},base,{why:x.why}):null}).filter(Boolean); content.innerHTML=items.map(item=>{const active=state.favorites.includes(item.artist); return '<div class="card"><div class="title">'+item.artist+'</div><div class="sub">'+item.festival+' · '+item.category+' · '+item.genre+'</div><div class="meta">'+item.day+(item.stage?' · '+item.stage:'')+'</div><div class="why">'+item.why+'</div><div class="actions"><button class="btn fav '+(active?'active':'')+'" data-fav="'+item.artist+'">'+(active?'★ Favoritt':'☆ Favoritt')+'</button><a class="btn" href="'+item.spotify+'" target="_blank" rel="noopener noreferrer">Spotify</a><a class="btn" href="'+item.link+'" target="_blank" rel="noopener noreferrer">Festival</a></div></div>'}).join(''); bindFavButtons()}
+function renderFavoritter(){const items=filtered().filter(item=>state.favorites.includes(item.artist)); if(!items.length){content.innerHTML='<div class="empty">Ingen favoritter ennå.</div>'; return} const map=new Map(); items.forEach(item=>{if(!map.has(item.day)) map.set(item.day,[]); map.get(item.day).push(item)}); content.innerHTML=Array.from(map.entries()).map(([day,arr])=>'<details open><summary>'+day+' <span class="count">('+arr.length+')</span></summary><div class="cards">'+arr.map(card).join('')+'</div></details>').join(''); bindFavButtons()}
+function renderPlan(){const items=DATA.filter(item=>state.favorites.includes(item.artist)); if(!items.length){content.innerHTML='<div class="empty">Min plan er tom.</div>'; return} const map=new Map(); items.forEach(item=>{if(!map.has(item.day)) map.set(item.day,[]); map.get(item.day).push(item)}); content.innerHTML=Array.from(map.entries()).map(([day,arr])=>'<details open><summary>'+day+' <span class="count">('+arr.length+' valgt)</span></summary><div class="cards">'+arr.map(card).join('')+'</div></details>').join(''); bindFavButtons()}
+function renderAbout(){content.innerHTML='<div class="empty"><strong>Festivalplan v5</strong><br><br>Ny, ren bygget versjon med naturlig scrolling, bør se-fane, favoritter og plan. Twisted Sister er fjernet fra Tons-delen.</div>'}
+function render(){document.querySelectorAll('.tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.view===state.view)); if(state.view==='festivaler') renderFestivaler(); else if(state.view==='borses') renderBorSe(); else if(state.view==='favoritter') renderFavoritter(); else if(state.view==='plan') renderPlan(); else renderAbout()}
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{state.view=btn.dataset.view; render()}));
+searchInput.addEventListener('input',e=>{state.search=e.target.value; render()}); festivalFilter.addEventListener('change',e=>{state.festival=e.target.value; render()});
+renderDayChips(); render();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=5').catch(()=>{}))}
+</script></body></html>
