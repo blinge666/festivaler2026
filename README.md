@@ -1,4 +1,4 @@
-# Festivalplan v2
+# Festivalplan v3
 
 Oppdatert PWA med:
 - Øya + Tons of Rock i én løsning
@@ -6,6 +6,7 @@ Oppdatert PWA med:
 - Min plan
 - Bør se-fane
 - Twisted Sister fjernet fra Tons-delen
+- headeren scroller nå naturlig med siden
 
 ## Publisering på GitHub Pages
 Last opp disse filene til roten av repoet:
