@@ -1,11 +1,11 @@
 {
-  "name": "Festivalplan v3",
+  "name": "Festivalplan v4",
   "short_name": "Festivalplan",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=4",
   "display": "standalone",
   "background_color": "#0f1115",
   "theme_color": "#0f1115",
-  "description": "Øya + Tons of Rock i én mobilvennlig PWA med favoritter, bør se og naturlig scrolling.",
+  "description": "Øya + Tons of Rock i én mobilvennlig PWA med favoritter, bør se, plan og cache-fix.",
   "icons": [
     {
       "src": "icon.svg",

@@ -1,21 +1,15 @@
-# Festivalplan v3
+# Festivalplan v4
 
-Oppdatert PWA med:
-- Øya + Tons of Rock i én løsning
-- Favoritter
-- Min plan
-- Bør se-fane
-- Twisted Sister fjernet fra Tons-delen
-- headeren scroller nå naturlig med siden
+Denne versjonen er cache-bustet for å unngå at GitHub Pages / service worker viser gammel app.
 
-## Publisering på GitHub Pages
-Last opp disse filene til roten av repoet:
+## Last opp disse filene til repo-root:
 - index.html
 - manifest.json
 - service-worker.js
 - icon.svg
+- README.md
 
-Velg deretter:
-- Deploy from a branch
-- main
-- / (root)
+## Etter upload
+1. Åpne https://blinge666.github.io/festivaler2026/?v=4
+2. På PC: Ctrl+Shift+R
+3. På mobil: slett gammel hjemmeskjerm-app før du åpner lenken og installerer på nytt
